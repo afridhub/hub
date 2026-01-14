@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Hub</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #94a3b8;
+            --text-light: #f1f5f9;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.15);
+            --hover: #334155;
+            --border: #334155;
+            --radius: 12px;
+        }
+
+        html[data-theme="light"] {
+            --bg: #f8fafc;
+            --card: #f1f5f9;
+            --text: #475569;
+            --text-light: #0f172a;
+            --accent: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.15);
+            --hover: #e2e8f0;
+            --border: #cbd5e1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px;
+            overflow-y: scroll;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            max-width: 1600px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 10px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--text-light);
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #b1a4a4, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .theme-toggle, .stats-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .theme-toggle:hover, .stats-btn:hover {
+            border-color: var(--accent);
+            background: var(--hover);
+            transform: translateY(-1px);
+        }
+
+        #search {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            padding: 14px 24px;
+            border-radius: 50px;
+            width: 350px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        #search:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .filter-section {
+            max-width: 1600px;
+            margin: 0 auto 24px;
+            padding: 0 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            border-color: var(--accent);
+            color: var(--text-light);
+            background: var(--hover);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .filter-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-right: 8px;
+        }
+
+        .stats-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stats-modal.show { display: flex; }
+
+        .stats-content {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-content h2 {
+            margin-top: 0;
+            color: var(--text-light);
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-btn:hover { color: var(--text-light); }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .stat-item:last-child { border-bottom: none; }
+
+        .grid {
+            column-count: 5;
+            column-gap: 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1600px) { .grid { column-count: 4; } }
+        @media (max-width: 1200px) { .grid { column-count: 3; } }
+        @media (max-width: 900px) { .grid { column-count: 2; } }
+        @media (max-width: 600px) { .grid { column-count: 1; } }
+
+        .category {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--border);
+            break-inside: avoid;
+            margin-bottom: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            border-color: #475569;
+        }
+
+        .category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .category:hover::before { opacity: 1; }
+
+        .category h2 {
+            margin: 0 0 18px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+        }
+
+        a:hover {
+            color: var(--text-light);
+            background: var(--hover);
+            padding-left: 14px;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .favorite-btn:hover {
+            color: var(--accent);
+            background: var(--hover);
+        }
+
+        .favorite-btn.favorited {
+            color: #fbbf24;
+        }
+
+        .link-count {
+            font-size: 11px;
+            color: #64748b;
+            padding: 2px 6px;
+            background: rgba(100, 116, 139, 0.2);
+            border-radius: 3px;
+            margin-left: 4px;
+            flex-shrink: 0;
+        }
+
+        .sub-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #64748b;
+            margin: 16px 0 6px 0;
+            font-weight: 700;
+            padding-left: 10px;
+        }
+
+        .link-list .sub-header:first-of-type { margin-top: 4px; }
+
+        .highlight {
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text);
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .recent-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            max-width: 1600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .recent-section h3 {
+            margin: 0 0 12px 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .recent-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .recent-link {
+            background: var(--hover);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .recent-link:hover {
+            color: var(--text-light);
+            border-color: var(--accent);
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>My Hub</h1>
+        <div class="header-controls">
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+            <button class="stats-btn" onclick="showStats()">📊 Stats</button>
+        </div>
+        <input type="text" id="search" placeholder="Type to find link..." onkeyup="filter()">
+    </div>
+
+    <div class="filter-section">
+        <span class="filter-label">Filter by category:</span>
+        <button class="filter-btn active" onclick="filterByCategory(this, 'all')">All</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'Daily')">⚡ Daily</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'AI Chat')">🧠 AI Chat</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'AI Visuals')">🎨 Visuals</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'Media')">🎬 Media</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'Dev')">💻 Dev</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'Gaming')">🎮 Gaming</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'Utilities')">🛠️ Utilities</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'Shopping')">🛒 Shopping</button>
+        <button class="filter-btn" onclick="filterByCategory(this, 'Official')">💼 Official</button>
+        <button class="filter-btn" onclick="toggleFavoritesOnly()">⭐ Favorites</button>
+    </div>
+
+    <div class="recent-section" id="recentSection" style="display: none;">
+        <h3>📌 Recently Visited</h3>
+        <div class="recent-links" id="recentLinks"></div>
+    </div>
+
+    <div class="stats-modal" id="statsModal">
+        <div class="stats-content">
+            <span class="close-btn" onclick="closeStats()">&times;</span>
+            <h2>📊 Statistics</h2>
+            <div id="statsBody"></div>
+            <button onclick="clearStats()" style="margin-top: 20px; padding: 10px 16px; background: var(--accent); color: var(--bg); border: none; border-radius: 6px; cursor: pointer;">Clear All Stats</button>
+        </div>
+    </div>
+
+    <div class="grid" id="container">
+        <div class="category" data-category="Daily">
+            <h2>⚡ Daily</h2>
+            <div class="link-list">
+                <div class="link-item">
+                    <a href="https://chatgpt.com/" onclick="trackLink(this)">ChatGPT</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="ChatGPT">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.youtube.com/" onclick="trackLink(this)">YouTube</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="YouTube">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.facebook.com/" onclick="trackLink(this)">Facebook</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Facebook">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://wa.me/+8801757055473" onclick="trackLink(this)">WhatsApp (Me)</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="WhatsApp (Me)">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://mail.tm/en/" onclick="trackLink(this)">Temp Mail</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Temp Mail">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://toffeelive.com/en" onclick="trackLink(this)">Toffee TV</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Toffee TV">0</span>
+                </div>
+                <div class="sub-header">Google Suite</div>
+                <div class="link-item">
+                    <a href="https://drive.google.com/drive/u/0/home" onclick="trackLink(this)">Drive</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Drive">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://docs.google.com/document/u/0/" onclick="trackLink(this)">Docs</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Docs">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://docs.google.com/spreadsheets/u/0/" onclick="trackLink(this)">Sheets</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Sheets">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://keep.google.com/" onclick="trackLink(this)">Keep</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Keep">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://translate.google.com/" onclick="trackLink(this)">Translate</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Translate">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://mail.google.com/chat/u/0/#chat/home" onclick="trackLink(this)">Chat</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Chat">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category" data-category="AI Chat">
+            <h2>🧠 AI Chat & Text</h2>
+            <div class="link-list">
+                <div class="link-item">
+                    <a href="https://gemini.google.com/app" onclick="trackLink(this)">Google Gemini</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Google Gemini">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://claude.ai/" onclick="trackLink(this)">Claude</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Claude">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.perplexity.ai/" onclick="trackLink(this)">Perplexity</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Perplexity">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://notebooklm.google/" onclick="trackLink(this)">NotebookLM</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="NotebookLM">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://poe.com/" onclick="trackLink(this)">Poe</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Poe">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://pi.ai/talk" onclick="trackLink(this)">Pi AI</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Pi AI">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://uncensored.chat/" onclick="trackLink(this)">Uncensored Chat</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Uncensored Chat">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://ollama.com/library" onclick="trackLink(this)">Ollama Lib</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Ollama Lib">0</span>
+                </div>
+                <div class="sub-header">Writing Tools</div>
+                <div class="link-item">
+                    <a href="https://seowriting.ai/dashboard" onclick="trackLink(this)">SEO Writing</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="SEO Writing">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://humbot.ai/" onclick="trackLink(this)">Humbot</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Humbot">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://aihumanizer.net/" onclick="trackLink(this)">AI Humanizer</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="AI Humanizer">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://wordcounter.net/" onclick="trackLink(this)">WordCounter</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="WordCounter">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.prepostseo.com/paraphrasing-tool" onclick="trackLink(this)">Paraphraser</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Paraphraser">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://hemingwayapp.com/" onclick="trackLink(this)">Hemingway</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Hemingway">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category" data-category="AI Visuals">
+            <h2>🎨 AI Visuals</h2>
+            <div class="link-list">
+                <div class="sub-header">Image Gen</div>
+                <div class="link-item">
+                    <a href="https://leonardo.ai/" onclick="trackLink(this)">Leonardo AI</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Leonardo AI">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://ideogram.ai/t/explore" onclick="trackLink(this)">Ideogram</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Ideogram">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://firefly.adobe.com/" onclick="trackLink(this)">Adobe Firefly</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Adobe Firefly">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.bing.com/images/create" onclick="trackLink(this)">Bing Create</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Bing Create">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://playgroundai.com/" onclick="trackLink(this)">Playground AI</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Playground AI">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://clipdrop.co/" onclick="trackLink(this)">ClipDrop</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="ClipDrop">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://perchance.org/ai-text-to-image-generator" onclick="trackLink(this)">Perchance (Free)</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Perchance (Free)">0</span>
+                </div>
+                <div class="sub-header">Video & Motion</div>
+                <div class="link-item">
+                    <a href="https://runwayml.com/" onclick="trackLink(this)">RunwayML</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="RunwayML">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://lumalabs.ai/dream-machine" onclick="trackLink(this)">Luma Dream</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Luma Dream">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://pixverse.ai/" onclick="trackLink(this)">PixVerse</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="PixVerse">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.klingai.com/" onclick="trackLink(this)">Kling AI</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Kling AI">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://viggle.ai/" onclick="trackLink(this)">Viggle</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Viggle">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.d-id.com/" onclick="trackLink(this)">D-ID</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="D-ID">0</span>
+                </div>
+                <div class="sub-header">Audio</div>
+                <div class="link-item">
+                    <a href="https://elevenlabs.io/" onclick="trackLink(this)">ElevenLabs</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="ElevenLabs">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://ttsmaker.com/" onclick="trackLink(this)">TTSMaker</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="TTSMaker">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category" data-category="Media">
+            <h2>🎬 Media & Anime</h2>
+            <div class="link-list">
+                <div class="sub-header">Portals</div>
+                <div class="link-item">
+                    <a href="https://hianime.to/home" onclick="trackLink(this)">HiAnime</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="HiAnime">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://aniwatchtv.to/home" onclick="trackLink(this)">AniWatch</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="AniWatch">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://9animetv.to/home" onclick="trackLink(this)">9Anime</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="9Anime">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://animixstream.com/" onclick="trackLink(this)">AnimixStream</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="AnimixStream">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://myanimelist.net/" onclick="trackLink(this)">MyAnimeList</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="MyAnimeList">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.imdb.com/" onclick="trackLink(this)">IMDb</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="IMDb">0</span>
+                </div>
+                <div class="sub-header">Downloaders</div>
+                <div class="link-item">
+                    <a href="https://snapsave.app/" onclick="trackLink(this)">SnapSave</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="SnapSave">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://savexr.com/" onclick="trackLink(this)">SaveXR</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="SaveXR">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.teraboxfast.com/" onclick="trackLink(this)">TeraboxFast</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="TeraboxFast">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://cobalt.tools/" onclick="trackLink(this)">Cobalt (Best)</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Cobalt (Best)">0</span>
+                </div>
+                <div class="sub-header">Torrents</div>
+                <div class="link-item">
+                    <a href="https://www2.thepiratebay3.co/" onclick="trackLink(this)">Pirate Bay</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Pirate Bay">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.limetorrents.fun/home" onclick="trackLink(this)">LimeTorrents</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="LimeTorrents">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category" data-category="Dev">
+            <h2>💻 Dev & Code</h2>
+            <div class="link-list">
+                <div class="link-item">
+                    <a href="https://github.com/" onclick="trackLink(this)">GitHub</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="GitHub">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://vercel.com/" onclick="trackLink(this)">Vercel</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Vercel">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://onecompiler.com/" onclick="trackLink(this)">OneCompiler</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="OneCompiler">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://replit.com/" onclick="trackLink(this)">Replit</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Replit">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://stackoverflow.com/" onclick="trackLink(this)">StackOverflow</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="StackOverflow">0</span>
+                </div>
+                <div class="sub-header">Python</div>
+                <div class="link-item">
+                    <a href="https://www.w3schools.com/python/" onclick="trackLink(this)">W3Schools Py</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="W3Schools Py">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://codingbat.com/python" onclick="trackLink(this)">CodingBat</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="CodingBat">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.kaggle.com/" onclick="trackLink(this)">Kaggle</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Kaggle">0</span>
+                </div>
+                <div class="sub-header">Design & UI</div>
+                <div class="link-item">
+                    <a href="https://www.figma.com/" onclick="trackLink(this)">Figma</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Figma">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://uiverse.io/" onclick="trackLink(this)">UIverse</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="UIverse">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.flaticon.com/" onclick="trackLink(this)">Flaticon</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Flaticon">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://gooyaabitemplates.com/" onclick="trackLink(this)">Blogger Temps</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Blogger Temps">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category" data-category="Gaming">
+            <h2>🎮 Gaming</h2>
+            <div class="link-list">
+                <div class="sub-header">Repacks</div>
+                <div class="link-item">
+                    <a href="https://fitgirl-repacks.site/" onclick="trackLink(this)">FitGirl</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="FitGirl">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://dodi-repacks.site/" onclick="trackLink(this)">DODI</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="DODI">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.apunkagames.com/" onclick="trackLink(this)">ApunKaGames</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="ApunKaGames">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://filecr.com/" onclick="trackLink(this)">FileCR</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="FileCR">0</span>
+                </div>
+                <div class="sub-header">Web Games</div>
+                <div class="link-item">
+                    <a href="https://poki.com/" onclick="trackLink(this)">Poki</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Poki">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://shellshock.io/" onclick="trackLink(this)">Shell Shockers</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Shell Shockers">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://itch.io/" onclick="trackLink(this)">Itch.io</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Itch.io">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.emugames.net/" onclick="trackLink(this)">EmuGames</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="EmuGames">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category" data-category="Utilities">
+            <h2>🛠️ Utilities</h2>
+            <div class="link-list">
+                <div class="link-item">
+                    <a href="https://tinywow.com/" onclick="trackLink(this)">TinyWow</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="TinyWow">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.remove.bg/" onclick="trackLink(this)">Remove.bg</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Remove.bg">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://vectorizer.ai/" onclick="trackLink(this)">Vectorizer.AI</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Vectorizer.AI">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://imgupscaler.ai/" onclick="trackLink(this)">ImgUpscaler</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="ImgUpscaler">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://vocalremover.org/" onclick="trackLink(this)">Vocal Remover</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Vocal Remover">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.virustotal.com/" onclick="trackLink(this)">VirusTotal</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="VirusTotal">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://smallpdf.com/" onclick="trackLink(this)">SmallPDF</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="SmallPDF">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://imagecolorpicker.com/" onclick="trackLink(this)">Color Picker</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Color Picker">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://temp-mail.org/" onclick="trackLink(this)">Temp Mail</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Temp Mail">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category" data-category="Shopping">
+            <h2>🛒 Shopping BD</h2>
+            <div class="link-list">
+                <div class="link-item">
+                    <a href="https://daraz.com.bd/" onclick="trackLink(this)">Daraz</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Daraz">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://foodpanda.com.bd/" onclick="trackLink(this)">FoodPanda</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="FoodPanda">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://startech.com.bd/" onclick="trackLink(this)">Star Tech</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Star Tech">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.mi.com/bd/" onclick="trackLink(this)">Xiaomi BD</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Xiaomi BD">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.samsung.com/bd/" onclick="trackLink(this)">Samsung BD</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Samsung BD">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.realme.com/bd/" onclick="trackLink(this)">Realme BD</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Realme BD">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.vivo.com/bd" onclick="trackLink(this)">Vivo BD</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Vivo BD">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category" data-category="Official">
+            <h2>💼 Official</h2>
+            <div class="link-list">
+                <div class="link-item">
+                    <a href="http://www.educationboardresults.gov.bd/" onclick="trackLink(this)">Edu Results</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Edu Results">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://btebresultszone.com/" onclick="trackLink(this)">BTEB Results</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="BTEB Results">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://services1.passportindia.gov.in/" onclick="trackLink(this)">Passport India</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="Passport India">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://customer.nesco.gov.bd/" onclick="trackLink(this)">NESCO Bill</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="NESCO Bill">0</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://oes.onpassive.com/auth" onclick="trackLink(this)">ONPASSIVE</a>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">☆</button>
+                    <span class="link-count" data-link="ONPASSIVE">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        loadFavorites();
+        updateRecentLinks();
+        initTheme();
+        updateCounts();
+
+        // Theme Management
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') !== 'light';
+            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            document.querySelector('.theme-toggle').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+        }
+
+        function initTheme() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.querySelector('.theme-toggle').textContent = theme === 'light' ? '☀️ Light' : '🌙 Dark';
+        }
+
+        // Favorites Management
+        function toggleFavorite(btn) {
+            btn.classList.toggle('favorited');
+            btn.textContent = btn.classList.contains('favorited') ? '★' : '☆';
+            saveFavorites();
+        }
+
+        function saveFavorites() {
+            const favs = Array.from(document.querySelectorAll('.favorite-btn.favorited')).map(btn => 
+                btn.parentElement.querySelector('a').textContent
+            );
+            localStorage.setItem('favorites', JSON.stringify(favs));
+        }
+
+        function loadFavorites() {
+            const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                const linkName = btn.parentElement.querySelector('a').textContent;
+                if (favs.includes(linkName)) {
+                    btn.classList.add('favorited');
+                    btn.textContent = '★';
+                }
+            });
+        }
+
+        // Link Tracking
+        function trackLink(link) {
+            const name = link.textContent;
+            const stats = JSON.parse(localStorage.getItem('linkStats') || '{}');
+            stats[name] = (stats[name] || 0) + 1;
+            localStorage.setItem('linkStats', JSON.stringify(stats));
+            
+            // Update recent links
+            let recent = JSON.parse(localStorage.getItem('recentLinks') || '[]');
+            recent = recent.filter(l => l !== name);
+            recent.unshift(name);
+            recent = recent.slice(0, 8);
+            localStorage.setItem('recentLinks', JSON.stringify(recent));
+            
+            updateRecentLinks();
+            updateCounts();
+        }
+
+        function updateCounts() {
+            const stats = JSON.parse(localStorage.getItem('linkStats') || '{}');
+            document.querySelectorAll('.link-count').forEach(span => {
+                const name = span.getAttribute('data-link');
+                span.textContent = stats[name] || '0';
+            });
+        }
+
+        function updateRecentLinks() {
+            const recent = JSON.parse(localStorage.getItem('recentLinks') || '[]');
+            const container = document.getElementById('recentLinks');
+            container.innerHTML = '';
+            
+            if (recent.length > 0) {
+                document.getElementById('recentSection').style.display = 'block';
+                recent.forEach(name => {
+                    const btn = document.createElement('div');
+                    btn.className = 'recent-link';
+                    btn.textContent = name;
+                    btn.onclick = () => {
+                        const link = Array.from(document.querySelectorAll('a')).find(a => a.textContent === name);
+                        if (link) link.click();
+                    };
+                    container.appendChild(btn);
+                });
+            } else {
+                document.getElementById('recentSection').style.display = 'none';
+            }
+        }
+
+        // Stats Management
+        function showStats() {
+            const stats = JSON.parse(localStorage.getItem('linkStats') || '{}');
+            const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+            
+            let html = '<div class="stat-item"><strong>Link</strong><strong>Visits</strong></div>';
+            sorted.forEach(([name, count]) => {
+                html += `<div class="stat-item"><span>${name}</span><span>${count}</span></div>`;
+            });
+            
+            if (sorted.length === 0) {
+                html = '<p style="color: var(--text); text-align: center;">No link visits yet. Start clicking links to see stats!</p>';
+            }
+            
+            document.getElementById('statsBody').innerHTML = html;
+            document.getElementById('statsModal').classList.add('show');
+        }
+
+        function closeStats() {
+            document.getElementById('statsModal').classList.remove('show');
+        }
+
+        function clearStats() {
+            if (confirm('Are you sure you want to clear all statistics?')) {
+                localStorage.removeItem('linkStats');
+                localStorage.removeItem('recentLinks');
+                updateCounts();
+                updateRecentLinks();
+                closeStats();
+            }
+        }
+
+        // Category Filtering
+        let currentCategory = 'all';
+        let favoritesOnly = false;
+
+        function filterByCategory(btn, cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
+        }
+
+        function toggleFavoritesOnly() {
+            favoritesOnly = !favoritesOnly;
+            const favBtn = document.querySelector('[onclick="toggleFavoritesOnly()"]');
+            favBtn.classList.toggle('active');
+            applyFilters();
+        }
+
+        // Search & Filtering
+        function filter() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const input = document.getElementById('search').value.toUpperCase();
+            const cards = document.querySelectorAll('.category');
+            const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+            cards.forEach(card => {
+                const category = card.getAttribute('data-category');
+                const links = card.querySelectorAll('a');
+                let cardHasMatch = false;
+
+                links.forEach(link => {
+                    const txt = link.textContent;
+                    const matchesSearch = txt.toUpperCase().includes(input);
+                    const isFavorited = favs.includes(txt);
+                    const matchesFilter = currentCategory === 'all' || category === currentCategory;
+                    const shouldShow = matchesSearch && matchesFilter && (!favoritesOnly || isFavorited);
+
+                    link.parentElement.style.display = shouldShow ? '' : 'none';
+                    if (shouldShow) cardHasMatch = true;
+                });
+
+                const subs = card.querySelectorAll('.sub-header');
+                subs.forEach(sub => {
+                    sub.style.display = input.length > 0 ? 'none' : '';
+                });
+
+                card.style.display = (cardHasMatch && (currentCategory === 'all' || category === currentCategory)) ? '' : 'none';
+            });
+        }
+
+        // Close modal on outside click
+        document.getElementById('statsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeStats();
+        });
+    </script>
+</body>
+</html>
