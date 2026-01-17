@@ -394,6 +394,525 @@
             color: var(--bg);
         }
 
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-modal.show { display: flex; }
+
+        .settings-content {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .settings-content h2 {
+            margin-top: 0;
+            color: var(--text-light);
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--hover);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .setting-group input[type="color"],
+        .setting-group input[type="text"],
+        .setting-group select {
+            width: 100%;
+            padding: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            border-radius: 6px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .setting-group input[type="color"] {
+            width: 60px;
+            cursor: pointer;
+            height: 40px;
+        }
+
+        .color-preview {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            margin-left: 10px;
+            border: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .btn-group button {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reset {
+            background: var(--border);
+            color: var(--text-light);
+        }
+
+        .btn-reset:hover {
+            background: #475569;
+        }
+
+        .danger-zone {
+            background: rgba(220, 38, 38, 0.1) !important;
+            border-color: #991b1b !important;
+        }
+
+        .btn-danger {
+            background: #991b1b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #7f1d1d;
+        }
+
+        .settings-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .settings-btn:hover {
+            border-color: var(--accent);
+            background: var(--hover);
+            transform: translateY(-1px);
+        }
+
+        .edit-mode-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            z-index: 500;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .edit-mode-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.5);
+        }
+
+        .edit-mode-toggle.active {
+            background: #dc2626;
+        }
+
+        .edit-controls {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .edit-mode .edit-controls {
+            display: flex;
+        }
+
+        .edit-btn, .delete-btn, .add-btn {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+        }
+
+        .delete-btn:hover {
+            background: #991b1b;
+        }
+
+        .edit-btn:hover, .add-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .category.edit-mode-active {
+            border: 2px dashed var(--accent);
+            position: relative;
+        }
+
+        .category.edit-mode-active::after {
+            content: '✏️ EDIT MODE';
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .link-item.edit-mode-active {
+            background: rgba(56, 189, 248, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+
+        .edit-input {
+            background: var(--hover);
+            border: 1px solid var(--accent);
+            color: var(--text-light);
+            padding: 6px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-box h3 {
+            margin-top: 0;
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            background: var(--hover);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            border-radius: 6px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .edit-toolbar {
+            display: none;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 24px;
+            max-width: 1600px;
+            margin-left: auto;
+            margin-right: auto;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .edit-mode .edit-toolbar {
+            display: flex;
+        }
+
+        .edit-toolbar button {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .edit-toolbar button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .subheader-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 10px;
+        }
+
+        .subheader-item .subheader-controls {
+            display: none;
+            gap: 4px;
+        }
+
+        .edit-mode .subheader-item:hover .subheader-controls {
+            display: flex;
+        }
+
+        .subheader-controls button {
+            background: #fbbf24;
+            color: #000;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .subheader-controls button:hover {
+            opacity: 0.8;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .link-item:hover .link-edit-controls {
+            display: flex !important;
+        }
+
+        /* Dropdown styles */
+        .dropdown-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-input {
+            width: 100%;
+            padding: 8px;
+            background: var(--hover);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            border-radius: 6px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .dropdown-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .dropdown-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-list.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: var(--text);
+            transition: all 0.2s;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--hover);
+            color: var(--text-light);
+            padding-left: 16px;
+        }
+
+        .dropdown-item.selected {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
     </style>
 </head>
 <body>
@@ -402,6 +921,7 @@
         <div class="header-controls">
             <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
             <button class="stats-btn" onclick="showStats()">📊 Stats</button>
+            <button class="settings-btn" onclick="showSettings()">⚙️ Settings</button>
         </div>
         <input type="text" id="search" placeholder="Type to find link..." onkeyup="filter()">
     </div>
@@ -432,6 +952,97 @@
             <h2>📊 Statistics</h2>
             <div id="statsBody"></div>
             <button onclick="clearStats()" style="margin-top: 20px; padding: 10px 16px; background: var(--accent); color: var(--bg); border: none; border-radius: 6px; cursor: pointer;">Clear All Stats</button>
+        </div>
+    </div>
+
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <span class="close-btn" onclick="closeSettings()">&times;</span>
+            <h2>⚙️ Customization Settings</h2>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('appearance')">Appearance</button>
+                <button class="tab-btn" onclick="switchTab('layout')">Layout</button>
+                <button class="tab-btn" onclick="switchTab('advanced')">Advanced</button>
+            </div>
+
+            <div id="appearance" class="tab-content active">
+                <div class="setting-group">
+                    <label>Accent Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="accentColor">
+                        <div class="color-preview" id="accentPreview"></div>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Card Background</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="cardColor">
+                        <div class="color-preview" id="cardPreview"></div>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Text Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="textColor">
+                        <div class="color-preview" id="textPreview"></div>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Border Radius (e.g., 12px, 8px, 0px)</label>
+                    <input type="text" id="borderRadius" placeholder="12px">
+                </div>
+            </div>
+
+            <div id="layout" class="tab-content">
+                <div class="setting-group">
+                    <label>Default Column Count</label>
+                    <select id="columnCount">
+                        <option value="5">5 Columns (Default)</option>
+                        <option value="4">4 Columns</option>
+                        <option value="3">3 Columns</option>
+                        <option value="2">2 Columns</option>
+                        <option value="1">1 Column (Full Width)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Column Gap (pixels)</label>
+                    <input type="text" id="columnGap" placeholder="24">
+                </div>
+                <div class="setting-group">
+                    <label>Padding (pixels)</label>
+                    <input type="text" id="padding" placeholder="40">
+                </div>
+            </div>
+
+            <div id="advanced" class="tab-content">
+                <div class="setting-group">
+                    <label>Page Title</label>
+                    <input type="text" id="pageTitle" placeholder="My Hub">
+                </div>
+                <div class="setting-group">
+                    <label>Font Family</label>
+                    <input type="text" id="fontFamily" placeholder="Segoe UI, system-ui, -apple-system, sans-serif">
+                </div>
+                <div class="setting-group">
+                    <label>Enable Recent Links Section</label>
+                    <select id="enableRecent">
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+                <div class="setting-group danger-zone">
+                    <label style="color: #dc2626; font-weight: 700;">⚠️ Danger Zone</label>
+                    <button class="btn-danger" onclick="exportSettings()" style="width: 100%; margin-top: 8px;">📥 Export Settings</button>
+                    <button class="btn-danger" onclick="importSettings()" style="width: 100%; margin-top: 8px;">📤 Import Settings</button>
+                    <button class="btn-danger" onclick="resetAllSettings()" style="width: 100%; margin-top: 8px;">🔄 Reset to Default</button>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-save" onclick="saveSettings()">💾 Save Settings</button>
+                <button class="btn-reset" onclick="closeSettings()">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -973,6 +1584,136 @@
         </div>
     </div>
 
+    <div class="edit-toolbar">
+        <span style="color: var(--text-light); font-weight: 600;">📝 Edit Mode Active</span>
+        <button onclick="addNewColumn()">➕ Add Column</button>
+        <button onclick="addLinkToColumn()">🔗 Add Link</button>
+        <button onclick="addNewSubheader()">📌 Add Subheader</button>
+        <button onclick="saveAllEdits()" style="background: #10b981;">✅ Save All Changes</button>
+    </div>
+
+    <!-- Add Subheader Modal -->
+    <div class="modal-overlay" id="addSubheaderModal">
+        <div class="modal-box">
+            <h3>➕ Add Subheader</h3>
+            <div class="form-group">
+                <label>Column Name</label>
+                <div class="dropdown-wrapper">
+                    <input type="text" id="subheaderColumn" placeholder="Select column" class="dropdown-input" autocomplete="off">
+                    <div class="dropdown-list" id="subheaderColumnList"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Subheader Text</label>
+                <input type="text" id="subheaderText" placeholder="e.g., Popular Links" autocomplete="off">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-primary" onclick="confirmAddSubheader()">Add Subheader</button>
+                <button class="btn-secondary" onclick="closeModal('addSubheaderModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Link Modal -->
+    <div class="modal-overlay" id="addLinkModal">
+        <div class="modal-box">
+            <h3>🔗 Add New Link</h3>
+            <div class="form-group">
+                <label>Column Name</label>
+                <div class="dropdown-wrapper">
+                    <input type="text" id="linkColumnSelect" placeholder="Select column" class="dropdown-input" autocomplete="off">
+                    <div class="dropdown-list" id="linkColumnList"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Link Title</label>
+                <input type="text" id="linkTitle" placeholder="e.g., GitHub" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Link URL</label>
+                <input type="text" id="linkUrl" placeholder="https://example.com" autocomplete="off">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-primary" onclick="confirmAddLink()">Add Link</button>
+                <button class="btn-secondary" onclick="closeModal('addLinkModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Column Modal -->
+    <div class="modal-overlay" id="addColumnModal">
+        <div class="modal-box">
+            <h3>➕ Add New Column</h3>
+            <div class="form-group">
+                <label>Column Name</label>
+                <input type="text" id="columnName" placeholder="e.g., My Tools">
+            </div>
+            <div class="form-group">
+                <label>Column Icon (Emoji)</label>
+                <input type="text" id="columnIcon" placeholder="e.g., 🛠️" maxlength="3">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-primary" onclick="confirmAddColumn()">Create Column</button>
+                <button class="btn-secondary" onclick="closeModal('addColumnModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Link Modal -->
+    <div class="modal-overlay" id="editLinkModal">
+        <div class="modal-box">
+            <h3>✏️ Edit Link</h3>
+            <div class="form-group">
+                <label>Link Title</label>
+                <input type="text" id="editLinkTitle" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Link URL</label>
+                <input type="text" id="editLinkUrl" autocomplete="off">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-primary" onclick="confirmEditLink()">Save Link</button>
+                <button class="btn-secondary" onclick="closeModal('editLinkModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Subheader Modal -->
+    <div class="modal-overlay" id="editSubheaderModal">
+        <div class="modal-box">
+            <h3>✏️ Edit Subheader</h3>
+            <div class="form-group">
+                <label>Subheader Text</label>
+                <input type="text" id="editSubheaderText" autocomplete="off">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-primary" onclick="confirmEditSubheader()">Save Subheader</button>
+                <button class="btn-secondary" onclick="closeModal('editSubheaderModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Column Modal -->
+    <div class="modal-overlay" id="editColumnModal">
+        <div class="modal-box">
+            <h3>✏️ Edit Column</h3>
+            <div class="form-group">
+                <label>Column Name</label>
+                <input type="text" id="editColumnName">
+            </div>
+            <div class="form-group">
+                <label>Column Icon (Emoji)</label>
+                <input type="text" id="editColumnIcon" maxlength="3">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-primary" onclick="confirmEditColumn()">Save Column</button>
+                <button class="btn-secondary" onclick="closeModal('editColumnModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="edit-mode-toggle" onclick="toggleEditMode()" id="editModeBtn">✏️ Edit</button>
+
     <script>
         // Initialize
         loadFavorites();
@@ -1022,12 +1763,13 @@
 
         // Link Tracking
         function trackLink(link) {
+            if (editMode) return; // Don't track in edit mode
+            
             const name = link.textContent;
             const stats = JSON.parse(localStorage.getItem('linkStats') || '{}');
             stats[name] = (stats[name] || 0) + 1;
             localStorage.setItem('linkStats', JSON.stringify(stats));
             
-            // Update recent links
             let recent = JSON.parse(localStorage.getItem('recentLinks') || '[]');
             recent = recent.filter(l => l !== name);
             recent.unshift(name);
@@ -1036,6 +1778,9 @@
             
             updateRecentLinks();
             updateCounts();
+            
+            // Allow the link to navigate naturally
+            return true;
         }
 
         function updateCounts() {
@@ -1100,63 +1845,872 @@
             }
         }
 
-        // Category Filtering
-        let currentCategory = 'all';
-        let favoritesOnly = false;
-
-        function filterByCategory(btn, cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            applyFilters();
+        // Settings Management
+        function showSettings() {
+            loadSettingsUI();
+            document.getElementById('settingsModal').classList.add('show');
         }
 
-        function toggleFavoritesOnly() {
-            favoritesOnly = !favoritesOnly;
-            const favBtn = document.querySelector('[onclick="toggleFavoritesOnly()"]');
-            favBtn.classList.toggle('active');
-            applyFilters();
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('show');
         }
 
-        // Search & Filtering
-        function filter() {
-            applyFilters();
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        function applyFilters() {
-            const input = document.getElementById('search').value.toUpperCase();
-            const cards = document.querySelectorAll('.category');
-            const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+        function loadSettingsUI() {
+            const settings = JSON.parse(localStorage.getItem('dashboardSettings') || '{}');
+            
+            document.getElementById('accentColor').value = settings.accentColor || '#38bdf8';
+            document.getElementById('cardColor').value = settings.cardColor || '#1e293b';
+            document.getElementById('textColor').value = settings.textColor || '#94a3b8';
+            document.getElementById('borderRadius').value = settings.borderRadius || '12px';
+            document.getElementById('columnCount').value = settings.columnCount || '5';
+            document.getElementById('columnGap').value = settings.columnGap || '24';
+            document.getElementById('padding').value = settings.padding || '40';
+            document.getElementById('pageTitle').value = settings.pageTitle || 'My Hub';
+            document.getElementById('fontFamily').value = settings.fontFamily || 'Segoe UI, system-ui, -apple-system, sans-serif';
+            document.getElementById('enableRecent').value = String(settings.enableRecent !== false);
+            
+            updateColorPreviews();
+        }
 
-            cards.forEach(card => {
-                const category = card.getAttribute('data-category');
-                const links = card.querySelectorAll('a');
-                let cardHasMatch = false;
+        function updateColorPreviews() {
+            document.getElementById('accentPreview').style.backgroundColor = document.getElementById('accentColor').value;
+            document.getElementById('cardPreview').style.backgroundColor = document.getElementById('cardColor').value;
+            document.getElementById('textPreview').style.backgroundColor = document.getElementById('textColor').value;
+        }
 
-                links.forEach(link => {
-                    const txt = link.textContent;
-                    const matchesSearch = txt.toUpperCase().includes(input);
-                    const isFavorited = favs.includes(txt);
-                    const matchesFilter = currentCategory === 'all' || category === currentCategory;
-                    const shouldShow = matchesSearch && matchesFilter && (!favoritesOnly || isFavorited);
+        function saveSettings() {
+            const settings = {
+                accentColor: document.getElementById('accentColor').value,
+                cardColor: document.getElementById('cardColor').value,
+                textColor: document.getElementById('textColor').value,
+                borderRadius: document.getElementById('borderRadius').value,
+                columnCount: document.getElementById('columnCount').value,
+                columnGap: document.getElementById('columnGap').value,
+                padding: document.getElementById('padding').value,
+                pageTitle: document.getElementById('pageTitle').value,
+                fontFamily: document.getElementById('fontFamily').value,
+                enableRecent: document.getElementById('enableRecent').value === 'true'
+            };
+            
+            localStorage.setItem('dashboardSettings', JSON.stringify(settings));
+            applySettings();
+            closeSettings();
+            alert('✅ Settings saved successfully!');
+        }
 
-                    link.parentElement.style.display = shouldShow ? '' : 'none';
-                    if (shouldShow) cardHasMatch = true;
-                });
+        function applySettings() {
+            const settings = JSON.parse(localStorage.getItem('dashboardSettings') || '{}');
+            
+            document.documentElement.style.setProperty('--accent', settings.accentColor || '#38bdf8');
+            document.documentElement.style.setProperty('--card', settings.cardColor || '#1e293b');
+            document.documentElement.style.setProperty('--text', settings.textColor || '#94a3b8');
+            document.documentElement.style.setProperty('--radius', settings.borderRadius || '12px');
+            
+            if (settings.fontFamily) {
+                document.body.style.fontFamily = settings.fontFamily;
+            }
+            
+            if (settings.padding) {
+                document.body.style.padding = settings.padding + 'px';
+            }
+            
+            const grid = document.querySelector('.grid');
+            if (settings.columnCount) {
+                grid.style.columnCount = settings.columnCount;
+            }
+            if (settings.columnGap) {
+                grid.style.columnGap = settings.columnGap + 'px';
+            }
+            
+            if (settings.pageTitle) {
+                document.querySelector('h1').textContent = settings.pageTitle;
+            }
+            
+            if (settings.enableRecent === false) {
+                document.getElementById('recentSection').style.display = 'none';
+            }
+        }
 
-                const subs = card.querySelectorAll('.sub-header');
-                subs.forEach(sub => {
-                    sub.style.display = input.length > 0 ? 'none' : '';
-                });
+        function exportSettings() {
+            const settings = localStorage.getItem('dashboardSettings') || '{}';
+            const stats = localStorage.getItem('linkStats') || '{}';
+            const favorites = localStorage.getItem('favorites') || '[]';
+            const theme = localStorage.getItem('theme') || 'dark';
+            
+            const exportData = {
+                settings: JSON.parse(settings),
+                stats: JSON.parse(stats),
+                favorites: JSON.parse(favorites),
+                theme: theme,
+                exportDate: new Date().toLocaleString()
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `dashboard-backup-${Date.now()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            alert('✅ Settings exported successfully!');
+        }
 
-                card.style.display = (cardHasMatch && (currentCategory === 'all' || category === currentCategory)) ? '' : 'none';
-            });
+        function importSettings() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        localStorage.setItem('dashboardSettings', JSON.stringify(data.settings || {}));
+                        localStorage.setItem('linkStats', JSON.stringify(data.stats || {}));
+                        localStorage.setItem('favorites', JSON.stringify(data.favorites || []));
+                        localStorage.setItem('theme', data.theme || 'dark');
+                        
+                        applySettings();
+                        loadFavorites();
+                        updateCounts();
+                        initTheme();
+                        closeSettings();
+                        alert('✅ Settings imported successfully! Page will refresh.');
+                        location.reload();
+                    } catch (err) {
+                        alert('❌ Error importing settings: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function resetAllSettings() {
+            if (confirm('⚠️ Are you sure? This will reset all settings, stats, and favorites to default.')) {
+                localStorage.removeItem('dashboardSettings');
+                localStorage.removeItem('linkStats');
+                localStorage.removeItem('favorites');
+                localStorage.setItem('theme', 'dark');
+                
+                applySettings();
+                loadFavorites();
+                updateCounts();
+                initTheme();
+                closeSettings();
+                alert('✅ All settings reset to default. Page will refresh.');
+                location.reload();
+            }
         }
 
         // Close modal on outside click
         document.getElementById('statsModal').addEventListener('click', function(e) {
             if (e.target === this) closeStats();
         });
+        document.getElementById('settingsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeSettings();
+        });
+
+        let editMode = false;
+        let currentEditLink = null;
+        let currentEditColumn = null;
+        let currentEditSubheader = null;
+
+        // Load custom data from localStorage on page load
+        window.addEventListener('load', () => {
+            applySettings();
+            loadCustomData();
+            makeAllLinksEditable();
+        });
+
+        // Enhanced Custom Data Management
+        function loadCustomData() {
+            const customData = JSON.parse(localStorage.getItem('customDashboard') || '{}');
+            
+            // First, handle deleted original links
+            if (customData.deletedOriginalLinks) {
+                customData.deletedOriginalLinks.forEach(linkTitle => {
+                    const links = document.querySelectorAll('a');
+                    links.forEach(link => {
+                        if (link.textContent === linkTitle) {
+                            link.closest('.link-item').remove();
+                        }
+                    });
+                });
+            }
+            
+            // Load custom columns
+            if (customData.columns) {
+                customData.columns.forEach(col => addCustomColumn(col));
+            }
+            
+            // Load modified links (both pre-existing and custom)
+            if (customData.modifiedLinks) {
+                customData.modifiedLinks.forEach(link => applyLinkModification(link));
+            }
+
+            // Load custom subheaders
+            if (customData.subheaders) {
+                customData.subheaders.forEach(sub => addCustomSubheader(sub));
+            }
+        }
+
+        function applyLinkModification(linkMod) {
+            const category = linkMod.category;
+            const originalTitle = linkMod.originalTitle;
+            const newTitle = linkMod.title;
+            const newUrl = linkMod.url;
+
+            const cat = document.querySelector(`[data-category="${category}"]`);
+            if (!cat) return;
+
+            const links = cat.querySelectorAll('a');
+            const link = Array.from(links).find(l => l.textContent === originalTitle);
+            
+            if (link) {
+                // Link exists (was edited from original)
+                link.textContent = newTitle;
+                link.href = newUrl;
+                link.dataset.modified = 'true';
+                link.dataset.originalTitle = originalTitle;
+            } else if (linkMod.isCustom) {
+                // This is a custom link that doesn't exist yet - recreate it
+                addCustomLink({ title: newTitle, url: newUrl, category: category });
+            }
+        }
+
+        function saveCustomData() {
+            const customData = {
+                columns: [],
+                modifiedLinks: [],
+                deletedOriginalLinks: [],
+                subheaders: []
+            };
+
+            const originalCategories = ['Daily', 'AI Chat', 'AI Visuals', 'Media', 'Dev', 'Gaming', 'Utilities', 'Shopping', 'Official'];
+            const originalLinks = {
+                'Daily': ['ChatGPT', 'YouTube', 'Facebook', 'WhatsApp (Me)', 'Temp Mail', 'Toffee TV', 'Drive', 'Docs', 'Sheets', 'Keep', 'Translate', 'Chat'],
+                'AI Chat': ['Google Gemini', 'Claude', 'Perplexity', 'NotebookLM', 'Poe', 'Pi AI', 'Uncensored Chat', 'Ollama Lib', 'SEO Writing', 'Humbot', 'AI Humanizer', 'WordCounter', 'Paraphraser', 'Hemingway'],
+                'AI Visuals': ['Leonardo AI', 'Ideogram', 'Adobe Firefly', 'Bing Create', 'Playground AI', 'ClipDrop', 'Perchance (Free)', 'RunwayML', 'Luma Dream', 'PixVerse', 'Kling AI', 'Viggle', 'D-ID', 'ElevenLabs', 'TTSMaker'],
+                'Media': ['HiAnime', 'AniWatch', '9Anime', 'AnimixStream', 'MyAnimeList', 'IMDb', 'SnapSave', 'SaveXR', 'TeraboxFast', 'Cobalt (Best)', 'Pirate Bay', 'LimeTorrents'],
+                'Dev': ['GitHub', 'Vercel', 'OneCompiler', 'Replit', 'StackOverflow', 'W3Schools Py', 'CodingBat', 'Kaggle', 'Figma', 'UIverse', 'Flaticon', 'Blogger Temps'],
+                'Gaming': ['FitGirl', 'DODI', 'ApunKaGames', 'FileCR', 'Poki', 'Shell Shockers', 'Itch.io', 'EmuGames'],
+                'Utilities': ['TinyWow', 'Remove.bg', 'Vectorizer.AI', 'ImgUpscaler', 'Vocal Remover', 'VirusTotal', 'SmallPDF', 'Color Picker', 'Temp Mail'],
+                'Shopping': ['Daraz', 'FoodPanda', 'Star Tech', 'Xiaomi BD', 'Samsung BD', 'Realme BD', 'Vivo BD'],
+                'Official': ['Edu Results', 'BTEB Results', 'Passport India', 'NESCO Bill', 'ONPASSIVE']
+            };
+
+            // Save custom columns
+            document.querySelectorAll('.category').forEach(cat => {
+                const catName = cat.getAttribute('data-category');
+                if (!originalCategories.includes(catName)) {
+                    customData.columns.push({
+                        name: catName,
+                        icon: cat.querySelector('h2').textContent.split(' ')[0]
+                    });
+                }
+            });
+
+            // Save ALL modified/custom links
+            document.querySelectorAll('.link-item').forEach(item => {
+                const link = item.querySelector('a');
+                const category = link.closest('.category').getAttribute('data-category');
+                
+                if (link.dataset.modified === 'true' || link.dataset.custom === 'true') {
+                    customData.modifiedLinks.push({
+                        title: link.textContent,
+                        url: link.href,
+                        category: category,
+                        originalTitle: link.dataset.originalTitle || link.textContent,
+                        isCustom: link.dataset.custom === 'true'
+                    });
+                }
+            });
+
+            // Track deleted original links
+            for (const [category, links] of Object.entries(originalLinks)) {
+                links.forEach(originalTitle => {
+                    const found = Array.from(document.querySelectorAll('a')).find(a => a.textContent === originalTitle);
+                    if (!found) {
+                        customData.deletedOriginalLinks.push(originalTitle);
+                    }
+                });
+            }
+
+            // Save custom subheaders
+            document.querySelectorAll('.sub-header').forEach(sub => {
+                const category = sub.closest('.category').getAttribute('data-category');
+                if (sub.dataset.custom === 'true') {
+                    customData.subheaders.push({
+                        text: sub.textContent,
+                        category: category
+                    });
+                }
+            });
+
+            localStorage.setItem('customDashboard', JSON.stringify(customData));
+        }
+
+        function addCustomLink(link) {
+            let category = document.querySelector(`[data-category="${link.category}"]`);
+            
+            if (!category) {
+                addCustomColumn({ name: link.category, icon: '🔗' });
+                category = document.querySelector(`[data-category="${link.category}"]`);
+            }
+
+            const linkList = category.querySelector('.link-list');
+            const item = document.createElement('div');
+            item.className = 'link-item';
+
+            const linkEl = document.createElement('a');
+            linkEl.href = link.url;
+            linkEl.textContent = link.title;
+            linkEl.dataset.custom = 'true';
+            linkEl.dataset.editable = 'true';
+            linkEl.dataset.originalTitle = link.title;
+
+            const favBtn = document.createElement('button');
+            favBtn.className = 'favorite-btn';
+            favBtn.textContent = '☆';
+            favBtn.type = 'button';
+            favBtn.onclick = (e) => { 
+                e.stopPropagation(); 
+                toggleFavorite(favBtn); 
+            };
+
+            const count = document.createElement('span');
+            count.className = 'link-count';
+            count.setAttribute('data-link', link.title);
+            count.textContent = '0';
+
+            item.appendChild(linkEl);
+            item.appendChild(favBtn);
+            item.appendChild(count);
+            linkList.appendChild(item);
+
+            if (editMode) {
+                addLinkControls(category);
+            }
+        }
+
+        // Subheader Management
+        function editSubheader(subheader) {
+            document.getElementById('editSubheaderText').value = subheader.textContent;
+            currentEditSubheader = subheader;
+            openModal('editSubheaderModal');
+        }
+
+        function confirmEditSubheader() {
+            if (!currentEditSubheader) return;
+
+            const newText = document.getElementById('editSubheaderText').value.trim();
+            if (!newText) {
+                alert('Please enter subheader text');
+                return;
+            }
+
+            currentEditSubheader.textContent = newText;
+            currentEditSubheader.dataset.custom = 'true';
+            currentEditSubheader = null;
+            closeModal('editSubheaderModal');
+        }
+
+        function deleteSubheader(wrapper) {
+            if (confirm('Delete this subheader?')) {
+                wrapper.remove();
+            }
+        }
+
+        function confirmAddSubheader() {
+            const column = document.getElementById('subheaderColumn').value.trim();
+            const text = document.getElementById('subheaderText').value.trim();
+
+            if (!column || !text) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const categoryExists = document.querySelector(`[data-category="${column}"]`);
+            if (!categoryExists) {
+                alert('Column does not exist. Please create it first or select from the dropdown.');
+                return;
+            }
+
+            addCustomSubheader({ text, category: column });
+            closeModal('addSubheaderModal');
+            document.getElementById('subheaderColumn').value = '';
+            document.getElementById('subheaderText').value = '';
+        }
+
+        function addCustomSubheader(subheader) {
+            const category = document.querySelector(`[data-category="${subheader.category}"]`);
+            if (!category) {
+                alert('Column not found.');
+                return;
+            }
+
+            const linkList = category.querySelector('.link-list');
+            const sub = document.createElement('div');
+            sub.className = 'sub-header';
+            sub.textContent = subheader.text;
+            sub.dataset.custom = 'true';
+
+            linkList.appendChild(sub);
+
+            if (editMode) {
+                addSubheaderControls(category);
+            }
+        }
+
+        // Column Management
+        function confirmAddColumn() {
+            const name = document.getElementById('columnName').value.trim();
+            const icon = document.getElementById('columnIcon').value.trim() || '📌';
+
+            if (!name) {
+                alert('Please enter column name');
+                return;
+            }
+
+            if (document.querySelector(`[data-category="${name}"]`)) {
+                alert('Column already exists');
+                return;
+            }
+
+            addCustomColumn({ name, icon });
+            closeModal('addColumnModal');
+            document.getElementById('columnName').value = '';
+            document.getElementById('columnIcon').value = '';
+        }
+
+        function addCustomColumn(col) {
+            if (document.querySelector(`[data-category="${col.name}"]`)) {
+                return;
+            }
+
+            const container = document.getElementById('container');
+            const category = document.createElement('div');
+            category.className = 'category';
+            category.setAttribute('data-category', col.name);
+
+            category.innerHTML = `
+                <h2>${col.icon} ${col.name}</h2>
+                <div class="link-list"></div>
+            `;
+
+            container.appendChild(category);
+
+            if (editMode) {
+                category.classList.add('edit-mode-active');
+                addCategoryControls(category);
+            }
+        }
+
+        function editColumn(columnName) {
+            const category = document.querySelector(`[data-category="${columnName}"]`);
+            const h2 = category.querySelector('h2');
+            const parts = h2.textContent.split(' ');
+            const icon = parts[0];
+            const name = parts.slice(1).join(' ');
+
+            document.getElementById('editColumnName').value = name;
+            document.getElementById('editColumnIcon').value = icon;
+            currentEditColumn = columnName;
+            openModal('editColumnModal');
+        }
+
+        function confirmEditColumn() {
+            if (!currentEditColumn) return;
+
+            const newName = document.getElementById('editColumnName').value.trim();
+            const newIcon = document.getElementById('editColumnIcon').value.trim();
+
+            if (!newName) {
+                alert('Please enter column name');
+                return;
+            }
+
+            const category = document.querySelector(`[data-category="${currentEditColumn}"]`);
+            category.setAttribute('data-category', newName);
+            category.querySelector('h2').textContent = `${newIcon} ${newName}`;
+            currentEditColumn = null;
+            closeModal('editColumnModal');
+        }
+
+        function deleteColumn(columnName) {
+            if (confirm('Delete this column and all its links?')) {
+                const cat = document.querySelector(`[data-category="${columnName}"]`);
+                if (cat) cat.remove();
+            }
+        }
+
+        function makeAllLinksEditable() {
+            document.querySelectorAll('a').forEach(link => {
+                if (!link.dataset.editable) {
+                    link.dataset.editable = 'true';
+                    // Remove the onclick handler that was preventing navigation
+                    link.removeAttribute('onclick');
+                }
+            });
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const btn = document.getElementById('editModeBtn');
+            const body = document.body;
+
+            if (editMode) {
+                btn.classList.add('active');
+                btn.textContent = '✏️ Done';
+                body.classList.add('edit-mode');
+                document.querySelectorAll('.category').forEach(cat => {
+                    cat.classList.add('edit-mode-active');
+                    addCategoryControls(cat);
+                    addLinkControls(cat);
+                    addSubheaderControls(cat);
+                });
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '✏️ Edit';
+                body.classList.remove('edit-mode');
+                document.querySelectorAll('.category').forEach(cat => {
+                    cat.classList.remove('edit-mode-active');
+                    cat.querySelectorAll('.edit-controls').forEach(ctrl => ctrl.remove());
+                    cat.querySelectorAll('.subheader-item').forEach(item => {
+                        const sub = item.querySelector('.sub-header');
+                        if (sub) {
+                            item.replaceWith(sub);
+                        }
+                    });
+                });
+                saveAllEdits();
+            }
+        }
+
+        function addCategoryControls(category) {
+            if (category.querySelector('.category-controls')) return;
+
+            const catName = category.getAttribute('data-category');
+            const originalCategories = ['Daily', 'AI Chat', 'AI Visuals', 'Media', 'Dev', 'Gaming', 'Utilities', 'Shopping', 'Official'];
+            const isCustom = !originalCategories.includes(catName);
+
+            const controls = document.createElement('div');
+            controls.className = 'edit-controls category-controls';
+
+            if (isCustom) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = '✏️';
+                editBtn.type = 'button';
+                editBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    editColumn(catName); 
+                };
+                controls.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.type = 'button';
+                deleteBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    deleteColumn(catName); 
+                };
+                controls.appendChild(deleteBtn);
+            }
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-btn';
+            addBtn.textContent = '➕';
+            addBtn.type = 'button';
+            addBtn.onclick = (e) => { 
+                e.stopPropagation(); 
+                e.preventDefault();
+                openAddLinkModal(catName); 
+            };
+            controls.appendChild(addBtn);
+
+            category.style.position = 'relative';
+            category.appendChild(controls);
+        }
+
+        // Dropdown functionality
+        function setupDropdown(inputId, listId) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+
+            if (!input || !list) return;
+
+            input.addEventListener('focus', () => {
+                updateDropdownList(inputId, listId);
+                list.classList.add('show');
+            });
+
+            input.addEventListener('input', () => {
+                updateDropdownList(inputId, listId);
+                if (input.value.length > 0) {
+                    list.classList.add('show');
+                }
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => list.classList.remove('show'), 150);
+            });
+        }
+
+        function getAvailableColumns() {
+            const columns = [];
+            document.querySelectorAll('.category').forEach(cat => {
+                const catName = cat.getAttribute('data-category');
+                if (catName) columns.push(catName);
+            });
+            return columns.sort();
+        }
+
+        function updateDropdownList(inputId, listId) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+            if (!input || !list) return;
+
+            const filter = input.value.toUpperCase();
+            const columns = getAvailableColumns();
+
+            list.innerHTML = '';
+
+            const filteredColumns = columns.filter(col => 
+                col.toUpperCase().includes(filter) || filter === ''
+            );
+
+            if (filteredColumns.length === 0) {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = 'No columns found';
+                item.style.color = '#94a3b8';
+                item.style.cursor = 'default';
+                list.appendChild(item);
+                return;
+            }
+
+            filteredColumns.forEach(col => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                if (input.value.trim() === col) {
+                    item.classList.add('selected');
+                }
+                item.textContent = col;
+
+                item.addEventListener('click', () => {
+                    input.value = col;
+                    list.classList.remove('show');
+                    input.blur();
+                });
+
+                list.appendChild(item);
+            });
+        }
+
+        // Modal Management
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            modal.classList.add('show');
+
+            if (modalId === 'addLinkModal') {
+                document.getElementById('linkTitle').value = '';
+                document.getElementById('linkUrl').value = '';
+                if (!document.getElementById('linkColumnSelect').value) {
+                    document.getElementById('linkColumnSelect').value = '';
+                }
+                setTimeout(() => setupDropdown('linkColumnSelect', 'linkColumnList'), 50);
+            } else if (modalId === 'addSubheaderModal') {
+                document.getElementById('subheaderText').value = '';
+                document.getElementById('subheaderColumn').value = '';
+                setTimeout(() => setupDropdown('subheaderColumn', 'subheaderColumnList'), 50);
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.remove('show');
+        }
+
+        // Close modals on outside click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        function addLinkControls(category) {
+            category.querySelectorAll('.link-item').forEach(item => {
+                if (item.querySelector('.link-edit-controls')) return;
+
+                const link = item.querySelector('a');
+                const controls = document.createElement('div');
+                controls.className = 'edit-controls link-edit-controls';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = '✏️';
+                editBtn.type = 'button';
+                editBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    editLink(link); 
+                };
+                controls.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.type = 'button';
+                deleteBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    deleteLink(item); 
+                };
+                controls.appendChild(deleteBtn);
+
+                item.classList.add('edit-mode-active');
+                item.insertBefore(controls, item.querySelector('.favorite-btn'));
+            });
+        }
+
+        function addSubheaderControls(category) {
+            category.querySelectorAll('.sub-header').forEach(sub => {
+                if (sub.parentElement.classList.contains('subheader-item')) return;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'subheader-item';
+                
+                const subClone = sub.cloneNode(true);
+                const controls = document.createElement('div');
+                controls.className = 'subheader-controls';
+                
+                const editBtn = document.createElement('button');
+                editBtn.textContent = '✏️';
+                editBtn.type = 'button';
+                editBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    editSubheader(subClone); 
+                };
+                controls.appendChild(editBtn);
+
+                if (sub.dataset.custom === 'true') {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = '🗑️';
+                    deleteBtn.type = 'button';
+                    deleteBtn.onclick = (e) => { 
+                        e.stopPropagation(); 
+                        e.preventDefault();
+                        deleteSubheader(wrapper); 
+                    };
+                    controls.appendChild(deleteBtn);
+                }
+
+                wrapper.appendChild(subClone);
+                wrapper.appendChild(controls);
+                sub.replaceWith(wrapper);
+            });
+        }
+
+        // Link Management
+        function editLink(link) {
+            document.getElementById('editLinkTitle').value = link.textContent;
+            document.getElementById('editLinkUrl').value = link.href;
+            currentEditLink = link;
+            openModal('editLinkModal');
+        }
+
+        function confirmEditLink() {
+            if (!currentEditLink) return;
+
+            const newTitle = document.getElementById('editLinkTitle').value.trim();
+            const newUrl = document.getElementById('editLinkUrl').value.trim();
+
+            if (!newTitle || !newUrl) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const originalTitle = currentEditLink.dataset.originalTitle || currentEditLink.textContent;
+            
+            currentEditLink.textContent = newTitle;
+            currentEditLink.href = newUrl;
+            currentEditLink.dataset.modified = 'true';
+            currentEditLink.dataset.originalTitle = originalTitle;
+            
+            currentEditLink = null;
+            closeModal('editLinkModal');
+        }
+
+        function deleteLink(item) {
+            if (confirm('Delete this link?')) {
+                item.remove();
+            }
+        }
+
+        function addNewColumn() {
+            openModal('addColumnModal');
+        }
+
+        function addLinkToColumn() {
+            openModal('addLinkModal');
+        }
+
+        function addNewSubheader() {
+            openModal('addSubheaderModal');
+        }
+
+        function openAddLinkModal(columnName) {
+            document.getElementById('linkColumnSelect').value = columnName;
+            openModal('addLinkModal');
+        }
+
+        function confirmAddLink() {
+            const column = document.getElementById('linkColumnSelect').value.trim();
+            const title = document.getElementById('linkTitle').value.trim();
+            const url = document.getElementById('linkUrl').value.trim();
+
+            if (!column || !title || !url) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const categoryExists = document.querySelector(`[data-category="${column}"]`);
+            if (!categoryExists) {
+                alert('Column does not exist. Please create it first or select from the dropdown.');
+                return;
+            }
+
+            addCustomLink({ title, url, category: column });
+            closeModal('addLinkModal');
+            document.getElementById('linkTitle').value = '';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkColumnSelect').value = '';
+        }
+
+        function saveAllEdits() {
+            saveCustomData();
+            saveFavorites();
+            updateCounts();
+            alert('✅ All changes saved successfully!');
+        }
     </script>
 </body>
 </html>
