@@ -2011,6 +2011,74 @@
             }
         }
 
+        // Category Filtering
+        let currentCategory = 'all';
+        let favoritesOnly = false;
+
+        function filterByCategory(btn, cat) {
+            currentCategory = cat;
+            const favBtn = document.querySelector('[onclick="toggleFavoritesOnly()"]');
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                if (b !== favBtn) b.classList.remove('active');
+            });
+            if (btn) btn.classList.add('active');
+            applyFilters();
+        }
+
+        function toggleFavoritesOnly() {
+            favoritesOnly = !favoritesOnly;
+            const favBtn = document.querySelector('[onclick="toggleFavoritesOnly()"]');
+            if (favBtn) favBtn.classList.toggle('active', favoritesOnly);
+            applyFilters();
+        }
+
+        // Search & Filtering
+        function filter() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const input = document.getElementById('search').value.toUpperCase();
+            const filtering = input.length > 0 || favoritesOnly || currentCategory !== 'all';
+
+            document.querySelectorAll('.category').forEach(card => {
+                const category = card.getAttribute('data-category');
+                const matchesCategory = currentCategory === 'all' || category === currentCategory;
+                let cardHasMatch = false;
+
+                card.querySelectorAll('.link-item').forEach(item => {
+                    const link = item.querySelector('a');
+                    const matchesSearch = !link || link.textContent.toUpperCase().includes(input);
+                    const favBtn = item.querySelector('.favorite-btn');
+                    const isFavorited = !!favBtn && favBtn.classList.contains('favorited');
+                    const shouldShow = matchesCategory && matchesSearch && (!favoritesOnly || isFavorited);
+                    item.style.display = shouldShow ? '' : 'none';
+                    if (shouldShow) cardHasMatch = true;
+                });
+
+                // A subheader stays visible only while its own section still has links
+                const list = card.querySelector('.link-list');
+                if (list) {
+                    const segments = [];
+                    Array.from(list.children).forEach(child => {
+                        if (child.classList.contains('sub-header') || child.classList.contains('subheader-item')) {
+                            segments.push({ sub: child, items: [] });
+                        } else if (child.classList.contains('link-item')) {
+                            if (segments.length === 0) segments.push({ sub: null, items: [] });
+                            segments[segments.length - 1].items.push(child);
+                        }
+                    });
+                    segments.forEach(seg => {
+                        if (!seg.sub) return;
+                        const anyVisible = seg.items.length === 0 || seg.items.some(it => it.style.display !== 'none');
+                        seg.sub.style.display = anyVisible ? '' : 'none';
+                    });
+                }
+
+                card.style.display = (matchesCategory && (!filtering || cardHasMatch)) ? '' : 'none';
+            });
+        }
+
         // Close modal on outside click
         document.getElementById('statsModal').addEventListener('click', function(e) {
             if (e.target === this) closeStats();
@@ -2023,43 +2091,76 @@
         let currentEditLink = null;
         let currentEditColumn = null;
         let currentEditSubheader = null;
+        let customDataLoaded = false;
 
         // Load custom data from localStorage on page load
         window.addEventListener('load', () => {
             applySettings();
-            loadCustomData();
+            try {
+                loadCustomData();
+            } catch (err) {
+                console.error('Failed to restore saved dashboard:', err);
+            } finally {
+                customDataLoaded = true;
+            }
             makeAllLinksEditable();
+            // Re-apply name-based state so favorites/counts follow edited link names
+            loadFavorites();
+            updateCounts();
+            updateRecentLinks();
+        });
+
+        // Safety net: keep edits if the tab is closed or reloaded mid-edit
+        window.addEventListener('pagehide', () => {
+            if (editMode) autoSave();
         });
 
         // Enhanced Custom Data Management
         function loadCustomData() {
             const customData = JSON.parse(localStorage.getItem('customDashboard') || '{}');
-            
-            // First, handle deleted original links
-            if (customData.deletedOriginalLinks) {
-                customData.deletedOriginalLinks.forEach(linkTitle => {
-                    const links = document.querySelectorAll('a');
-                    links.forEach(link => {
-                        if (link.textContent === linkTitle) {
-                            link.closest('.link-item').remove();
-                        }
-                    });
-                });
-            }
-            
-            // Load custom columns
+
+            // Load custom columns first so links/subheaders have somewhere to go
             if (customData.columns) {
                 customData.columns.forEach(col => addCustomColumn(col));
             }
-            
+
             // Load modified links (both pre-existing and custom)
             if (customData.modifiedLinks) {
                 customData.modifiedLinks.forEach(link => applyLinkModification(link));
             }
 
+            // Apply edits to original subheaders in place
+            if (customData.modifiedSubheaders) {
+                customData.modifiedSubheaders.forEach(applySubheaderModification);
+            }
+
             // Load custom subheaders
             if (customData.subheaders) {
                 customData.subheaders.forEach(sub => addCustomSubheader(sub));
+            }
+
+            // Deletions are applied last: a renamed original is not a deleted one.
+            // Entries can be legacy plain strings (page-wide) or {category, title}.
+            if (customData.deletedOriginalLinks) {
+                const modifiedLinks = customData.modifiedLinks || [];
+                customData.deletedOriginalLinks.forEach(entry => {
+                    const legacy = typeof entry === 'string';
+                    const title = legacy ? entry : (entry && entry.title);
+                    const category = legacy ? null : (entry && entry.category);
+                    if (!title) return;
+
+                    const renamed = modifiedLinks.some(m =>
+                        m.originalTitle === title && (legacy || m.category === category)
+                    );
+                    if (renamed) return; // it was renamed, not deleted
+
+                    const scope = category ? document.querySelector(`[data-category="${category}"]`) : document;
+                    if (!scope) return;
+
+                    const victim = Array.from(scope.querySelectorAll('a')).find(a => a.textContent === title);
+                    const item = victim && victim.closest('.link-item');
+                    if (item) item.remove();
+                });
             }
         }
 
@@ -2081,10 +2182,28 @@
                 link.href = newUrl;
                 link.dataset.modified = 'true';
                 link.dataset.originalTitle = originalTitle;
+
+                // Keep the visit counter pointing at this link after a rename
+                const count = link.parentElement && link.parentElement.querySelector('.link-count');
+                if (count) count.setAttribute('data-link', newTitle);
             } else if (linkMod.isCustom) {
                 // This is a custom link that doesn't exist yet - recreate it
                 addCustomLink({ title: newTitle, url: newUrl, category: category });
             }
+        }
+
+        function applySubheaderModification(subMod) {
+            const cat = document.querySelector(`[data-category="${subMod.category}"]`);
+            if (!cat) return;
+
+            const sub = Array.from(cat.querySelectorAll('.sub-header')).find(el =>
+                el.textContent === subMod.originalText && el.dataset.custom !== 'true'
+            );
+            if (!sub) return;
+
+            sub.textContent = subMod.text;
+            sub.dataset.modified = 'true';
+            sub.dataset.originalText = subMod.originalText;
         }
 
         function saveCustomData() {
@@ -2092,7 +2211,8 @@
                 columns: [],
                 modifiedLinks: [],
                 deletedOriginalLinks: [],
-                subheaders: []
+                subheaders: [],
+                modifiedSubheaders: []
             };
 
             const originalCategories = ['Daily', 'AI Chat', 'AI Visuals', 'Media', 'Dev', 'Gaming', 'Utilities', 'Shopping', 'Official'];
@@ -2135,23 +2255,33 @@
                 }
             });
 
-            // Track deleted original links
+            // Track deleted original links (per category; a renamed link still counts as present)
             for (const [category, links] of Object.entries(originalLinks)) {
+                const cat = document.querySelector(`[data-category="${category}"]`);
+                if (!cat) continue;
                 links.forEach(originalTitle => {
-                    const found = Array.from(document.querySelectorAll('a')).find(a => a.textContent === originalTitle);
-                    if (!found) {
-                        customData.deletedOriginalLinks.push(originalTitle);
+                    const present = Array.from(cat.querySelectorAll('a')).some(a =>
+                        a.textContent === originalTitle || a.dataset.originalTitle === originalTitle
+                    );
+                    if (!present) {
+                        customData.deletedOriginalLinks.push({ category: category, title: originalTitle });
                     }
                 });
             }
 
-            // Save custom subheaders
+            // Save custom subheaders and edits made to original ones
             document.querySelectorAll('.sub-header').forEach(sub => {
                 const category = sub.closest('.category').getAttribute('data-category');
                 if (sub.dataset.custom === 'true') {
                     customData.subheaders.push({
                         text: sub.textContent,
                         category: category
+                    });
+                } else if (sub.dataset.modified === 'true') {
+                    customData.modifiedSubheaders.push({
+                        text: sub.textContent,
+                        category: category,
+                        originalText: sub.dataset.originalText || sub.textContent
                     });
                 }
             });
@@ -2218,15 +2348,23 @@
                 return;
             }
 
+            const oldText = currentEditSubheader.textContent;
+            if (!currentEditSubheader.dataset.originalText) {
+                currentEditSubheader.dataset.originalText = oldText;
+            }
             currentEditSubheader.textContent = newText;
-            currentEditSubheader.dataset.custom = 'true';
+            if (currentEditSubheader.dataset.custom !== 'true') {
+                currentEditSubheader.dataset.modified = 'true';
+            }
             currentEditSubheader = null;
             closeModal('editSubheaderModal');
+            autoSave();
         }
 
         function deleteSubheader(wrapper) {
             if (confirm('Delete this subheader?')) {
                 wrapper.remove();
+                autoSave();
             }
         }
 
@@ -2249,6 +2387,7 @@
             closeModal('addSubheaderModal');
             document.getElementById('subheaderColumn').value = '';
             document.getElementById('subheaderText').value = '';
+            autoSave();
         }
 
         function addCustomSubheader(subheader) {
@@ -2290,6 +2429,7 @@
             closeModal('addColumnModal');
             document.getElementById('columnName').value = '';
             document.getElementById('columnIcon').value = '';
+            autoSave();
         }
 
         function addCustomColumn(col) {
@@ -2344,12 +2484,16 @@
             category.querySelector('h2').textContent = `${newIcon} ${newName}`;
             currentEditColumn = null;
             closeModal('editColumnModal');
+            autoSave();
         }
 
         function deleteColumn(columnName) {
             if (confirm('Delete this column and all its links?')) {
                 const cat = document.querySelector(`[data-category="${columnName}"]`);
-                if (cat) cat.remove();
+                if (cat) {
+                    cat.remove();
+                    autoSave();
+                }
             }
         }
 
@@ -2598,6 +2742,9 @@
                 wrapper.className = 'subheader-item';
                 
                 const subClone = sub.cloneNode(true);
+                if (subClone.dataset.custom !== 'true' && !subClone.dataset.originalText) {
+                    subClone.dataset.originalText = subClone.textContent;
+                }
                 const controls = document.createElement('div');
                 controls.className = 'subheader-controls';
                 
@@ -2648,20 +2795,42 @@
                 return;
             }
 
-            const originalTitle = currentEditLink.dataset.originalTitle || currentEditLink.textContent;
-            
-            currentEditLink.textContent = newTitle;
-            currentEditLink.href = newUrl;
-            currentEditLink.dataset.modified = 'true';
-            currentEditLink.dataset.originalTitle = originalTitle;
-            
+            const link = currentEditLink;
+            const oldTitle = link.textContent;
+            const originalTitle = link.dataset.originalTitle || oldTitle;
+
+            link.textContent = newTitle;
+            link.href = newUrl;
+            link.dataset.modified = 'true';
+            link.dataset.originalTitle = originalTitle;
+
+            const count = link.parentElement && link.parentElement.querySelector('.link-count');
+            if (count) count.setAttribute('data-link', newTitle);
+            if (oldTitle !== newTitle) remapLinkStats(oldTitle, newTitle);
+
             currentEditLink = null;
             closeModal('editLinkModal');
+            autoSave();
+        }
+
+        // Carry visit counts and recent links over when a link is renamed
+        function remapLinkStats(oldName, newName) {
+            const stats = JSON.parse(localStorage.getItem('linkStats') || '{}');
+            if (oldName in stats) {
+                stats[newName] = (stats[newName] || 0) + stats[oldName];
+                delete stats[oldName];
+                localStorage.setItem('linkStats', JSON.stringify(stats));
+            }
+
+            const recent = JSON.parse(localStorage.getItem('recentLinks') || '[]')
+                .map(name => name === oldName ? newName : name);
+            localStorage.setItem('recentLinks', JSON.stringify(recent));
         }
 
         function deleteLink(item) {
             if (confirm('Delete this link?')) {
                 item.remove();
+                autoSave();
             }
         }
 
@@ -2703,12 +2872,25 @@
             document.getElementById('linkTitle').value = '';
             document.getElementById('linkUrl').value = '';
             document.getElementById('linkColumnSelect').value = '';
+            autoSave();
+        }
+
+        // Every edit action writes straight to localStorage, so reloading the tab
+        // never throws work away (previously only "Done"/"Save All" persisted).
+        function autoSave() {
+            if (!customDataLoaded) return;
+            try {
+                saveCustomData();
+                saveFavorites();
+                updateCounts();
+                applyFilters(); // keep an active search/filter honest about edits
+            } catch (err) {
+                console.error('Auto-save failed:', err);
+            }
         }
 
         function saveAllEdits() {
-            saveCustomData();
-            saveFavorites();
-            updateCounts();
+            autoSave();
             alert('✅ All changes saved successfully!');
         }
     </script>
