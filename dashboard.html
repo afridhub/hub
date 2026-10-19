@@ -810,30 +810,74 @@
             align-items: center;
             justify-content: space-between;
             padding: 4px 10px;
+            margin: 16px 0 6px 0;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .link-list .subheader-item:first-of-type { margin-top: 4px; }
+        .subheader-item .sub-header { margin: 0; padding-left: 0; }
+
+        .edit-mode .subheader-item {
+            background: rgba(148, 163, 184, 0.05);
+        }
+
+        .edit-mode .subheader-item:hover {
+            background: rgba(56, 189, 248, 0.1);
         }
 
         .subheader-item .subheader-controls {
             display: none;
             gap: 4px;
+            align-items: center;
         }
 
-        .edit-mode .subheader-item:hover .subheader-controls {
+        .edit-mode .subheader-item .subheader-controls {
             display: flex;
         }
 
         .subheader-controls button {
-            background: #fbbf24;
-            color: #000;
             border: none;
-            padding: 2px 6px;
-            border-radius: 3px;
+            padding: 3px 6px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 11px;
+            font-weight: 600;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
-        .subheader-controls button:hover {
-            opacity: 0.8;
+        .subheader-controls .sub-add-btn {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .subheader-controls .sub-add-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .subheader-controls .sub-edit-btn {
+            background: #fbbf24;
+            color: #000;
+        }
+
+        .subheader-controls .sub-edit-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .subheader-controls .sub-delete-btn {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .subheader-controls .sub-delete-btn:hover {
+            background: #991b1b;
+            transform: scale(1.05);
         }
 
         .link-item {
@@ -1626,6 +1670,13 @@
                 </div>
             </div>
             <div class="form-group">
+                <label>Subheader (Optional)</label>
+                <div class="dropdown-wrapper">
+                    <input type="text" id="linkSubheaderSelect" placeholder="Select or type subheader (optional)" class="dropdown-input" autocomplete="off">
+                    <div class="dropdown-list" id="linkSubheaderList"></div>
+                </div>
+            </div>
+            <div class="form-group">
                 <label>Link Title</label>
                 <input type="text" id="linkTitle" placeholder="e.g., GitHub" autocomplete="off">
             </div>
@@ -1670,6 +1721,13 @@
             <div class="form-group">
                 <label>Link URL</label>
                 <input type="text" id="editLinkUrl" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Subheader (Optional)</label>
+                <div class="dropdown-wrapper">
+                    <input type="text" id="editLinkSubheaderSelect" placeholder="Select or type subheader (optional)" class="dropdown-input" autocomplete="off">
+                    <div class="dropdown-list" id="editLinkSubheaderList"></div>
+                </div>
             </div>
             <div class="form-buttons">
                 <button class="btn-primary" onclick="confirmEditLink()">Save Link</button>
@@ -1943,11 +2001,13 @@
             const stats = localStorage.getItem('linkStats') || '{}';
             const favorites = localStorage.getItem('favorites') || '[]';
             const theme = localStorage.getItem('theme') || 'dark';
+            const custom = localStorage.getItem('customDashboard') || '{}';
             
             const exportData = {
                 settings: JSON.parse(settings),
                 stats: JSON.parse(stats),
                 favorites: JSON.parse(favorites),
+                custom: JSON.parse(custom),
                 theme: theme,
                 exportDate: new Date().toLocaleString()
             };
@@ -1976,6 +2036,9 @@
                         localStorage.setItem('dashboardSettings', JSON.stringify(data.settings || {}));
                         localStorage.setItem('linkStats', JSON.stringify(data.stats || {}));
                         localStorage.setItem('favorites', JSON.stringify(data.favorites || []));
+                        if (data.custom) {
+                            localStorage.setItem('customDashboard', JSON.stringify(data.custom));
+                        }
                         localStorage.setItem('theme', data.theme || 'dark');
                         
                         applySettings();
@@ -1999,6 +2062,7 @@
                 localStorage.removeItem('dashboardSettings');
                 localStorage.removeItem('linkStats');
                 localStorage.removeItem('favorites');
+                localStorage.removeItem('customDashboard');
                 localStorage.setItem('theme', 'dark');
                 
                 applySettings();
@@ -2104,6 +2168,7 @@
                 customDataLoaded = true;
             }
             makeAllLinksEditable();
+            setupModalEnterKey();
             // Re-apply name-based state so favorites/counts follow edited link names
             loadFavorites();
             updateCounts();
@@ -2115,31 +2180,98 @@
             if (editMode) autoSave();
         });
 
+        function getSubheaderForLinkItem(item) {
+            if (!item) return null;
+            let prev = item.previousElementSibling;
+            while (prev) {
+                if (prev.classList.contains('sub-header')) {
+                    return prev.textContent.trim();
+                }
+                if (prev.classList.contains('subheader-item')) {
+                    const sub = prev.querySelector('.sub-header');
+                    return sub ? sub.textContent.trim() : prev.textContent.trim();
+                }
+                prev = prev.previousElementSibling;
+            }
+            return null;
+        }
+
+        function getAvailableSubheaders(columnName) {
+            if (!columnName) return [];
+            const cat = document.querySelector(`[data-category="${columnName}"]`);
+            if (!cat) return [];
+            const subs = [];
+            cat.querySelectorAll('.sub-header').forEach(sub => {
+                const text = sub.textContent.trim();
+                if (text && !subs.includes(text)) subs.push(text);
+            });
+            return subs;
+        }
+
+        function insertLinkIntoList(category, item, subheaderText) {
+            const linkList = category.querySelector('.link-list');
+            if (!linkList) return;
+
+            const cleanSub = (subheaderText || '').trim();
+
+            if (cleanSub) {
+                const allSubs = Array.from(category.querySelectorAll('.sub-header'));
+                let targetSub = allSubs.find(s => s.textContent.trim().toLowerCase() === cleanSub.toLowerCase());
+
+                if (!targetSub) {
+                    addCustomSubheader({ text: cleanSub, category: category.getAttribute('data-category') });
+                    const refreshedSubs = Array.from(category.querySelectorAll('.sub-header'));
+                    targetSub = refreshedSubs.find(s => s.textContent.trim().toLowerCase() === cleanSub.toLowerCase());
+                }
+
+                if (targetSub) {
+                    const subWrapper = targetSub.closest('.subheader-item') || targetSub;
+                    let insertAfterEl = subWrapper;
+                    let next = subWrapper.nextElementSibling;
+                    while (next && !next.classList.contains('sub-header') && !next.classList.contains('subheader-item')) {
+                        insertAfterEl = next;
+                        next = next.nextElementSibling;
+                    }
+                    insertAfterEl.after(item);
+                    return;
+                }
+            }
+
+            // No subheader specified: insert at top before first subheader if one exists
+            const firstSub = category.querySelector('.sub-header');
+            if (firstSub) {
+                const firstSubWrapper = firstSub.closest('.subheader-item') || firstSub;
+                firstSubWrapper.before(item);
+            } else {
+                linkList.appendChild(item);
+            }
+        }
+
         // Enhanced Custom Data Management
         function loadCustomData() {
             const customData = JSON.parse(localStorage.getItem('customDashboard') || '{}');
 
-            // Load custom columns first so links/subheaders have somewhere to go
+            // 1. Load custom columns first so links/subheaders have somewhere to go
             if (customData.columns) {
                 customData.columns.forEach(col => addCustomColumn(col));
             }
 
-            // Load modified links (both pre-existing and custom)
-            if (customData.modifiedLinks) {
-                customData.modifiedLinks.forEach(link => applyLinkModification(link));
-            }
-
-            // Apply edits to original subheaders in place
+            // 2. Apply edits to original subheaders in place
             if (customData.modifiedSubheaders) {
                 customData.modifiedSubheaders.forEach(applySubheaderModification);
             }
 
-            // Load custom subheaders
+            // 3. Load custom subheaders so they exist before custom links are positioned
             if (customData.subheaders) {
                 customData.subheaders.forEach(sub => addCustomSubheader(sub));
             }
 
-            // Deletions are applied last: a renamed original is not a deleted one.
+            // 4. Load modified links (both pre-existing and custom)
+            if (customData.modifiedLinks) {
+                customData.modifiedLinks.forEach(link => applyLinkModification(link));
+            }
+
+            // 5. Deletions are applied last: a renamed original is not a deleted one.
             // Entries can be legacy plain strings (page-wide) or {category, title}.
             if (customData.deletedOriginalLinks) {
                 const modifiedLinks = customData.modifiedLinks || [];
@@ -2183,12 +2315,20 @@
                 link.dataset.modified = 'true';
                 link.dataset.originalTitle = originalTitle;
 
+                if (linkMod.subheader !== undefined) {
+                    const item = link.closest('.link-item');
+                    const currentSub = getSubheaderForLinkItem(item);
+                    if (currentSub !== linkMod.subheader) {
+                        insertLinkIntoList(cat, item, linkMod.subheader);
+                    }
+                }
+
                 // Keep the visit counter pointing at this link after a rename
                 const count = link.parentElement && link.parentElement.querySelector('.link-count');
                 if (count) count.setAttribute('data-link', newTitle);
             } else if (linkMod.isCustom) {
                 // This is a custom link that doesn't exist yet - recreate it
-                addCustomLink({ title: newTitle, url: newUrl, category: category });
+                addCustomLink({ title: newTitle, url: newUrl, category: category, subheader: linkMod.subheader });
             }
         }
 
@@ -2242,13 +2382,17 @@
             // Save ALL modified/custom links
             document.querySelectorAll('.link-item').forEach(item => {
                 const link = item.querySelector('a');
-                const category = link.closest('.category').getAttribute('data-category');
+                if (!link) return;
+                const catEl = link.closest('.category');
+                if (!catEl) return;
+                const category = catEl.getAttribute('data-category');
                 
                 if (link.dataset.modified === 'true' || link.dataset.custom === 'true') {
                     customData.modifiedLinks.push({
                         title: link.textContent,
                         url: link.href,
                         category: category,
+                        subheader: getSubheaderForLinkItem(item),
                         originalTitle: link.dataset.originalTitle || link.textContent,
                         isCustom: link.dataset.custom === 'true'
                     });
@@ -2271,7 +2415,9 @@
 
             // Save custom subheaders and edits made to original ones
             document.querySelectorAll('.sub-header').forEach(sub => {
-                const category = sub.closest('.category').getAttribute('data-category');
+                const catEl = sub.closest('.category');
+                if (!catEl) return;
+                const category = catEl.getAttribute('data-category');
                 if (sub.dataset.custom === 'true') {
                     customData.subheaders.push({
                         text: sub.textContent,
@@ -2325,7 +2471,8 @@
             item.appendChild(linkEl);
             item.appendChild(favBtn);
             item.appendChild(count);
-            linkList.appendChild(item);
+            
+            insertLinkIntoList(category, item, link.subheader);
 
             if (editMode) {
                 addLinkControls(category);
@@ -2554,6 +2701,7 @@
                 const editBtn = document.createElement('button');
                 editBtn.className = 'edit-btn';
                 editBtn.textContent = '✏️';
+                editBtn.title = 'Edit Column';
                 editBtn.type = 'button';
                 editBtn.onclick = (e) => { 
                     e.stopPropagation(); 
@@ -2565,6 +2713,7 @@
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.textContent = '🗑️';
+                deleteBtn.title = 'Delete Column';
                 deleteBtn.type = 'button';
                 deleteBtn.onclick = (e) => { 
                     e.stopPropagation(); 
@@ -2577,6 +2726,7 @@
             const addBtn = document.createElement('button');
             addBtn.className = 'add-btn';
             addBtn.textContent = '➕';
+            addBtn.title = 'Add Link to this category';
             addBtn.type = 'button';
             addBtn.onclick = (e) => { 
                 e.stopPropagation(); 
@@ -2584,6 +2734,18 @@
                 openAddLinkModal(catName); 
             };
             controls.appendChild(addBtn);
+
+            const addSubBtn = document.createElement('button');
+            addSubBtn.className = 'add-btn';
+            addSubBtn.textContent = '📌';
+            addSubBtn.title = 'Add Subheader to this category';
+            addSubBtn.type = 'button';
+            addSubBtn.onclick = (e) => { 
+                e.stopPropagation(); 
+                e.preventDefault();
+                openAddSubheaderModal(catName); 
+            };
+            controls.appendChild(addSubBtn);
 
             category.style.position = 'relative';
             category.appendChild(controls);
@@ -2595,6 +2757,8 @@
             const list = document.getElementById(listId);
 
             if (!input || !list) return;
+            if (input.dataset.dropdownReady === 'true') return;
+            input.dataset.dropdownReady = 'true';
 
             input.addEventListener('focus', () => {
                 updateDropdownList(inputId, listId);
@@ -2603,9 +2767,7 @@
 
             input.addEventListener('input', () => {
                 updateDropdownList(inputId, listId);
-                if (input.value.length > 0) {
-                    list.classList.add('show');
-                }
+                list.classList.add('show');
             });
 
             input.addEventListener('blur', () => {
@@ -2627,11 +2789,67 @@
             const list = document.getElementById(listId);
             if (!input || !list) return;
 
-            const filter = input.value.toUpperCase();
-            const columns = getAvailableColumns();
-
+            const filter = input.value.trim().toUpperCase();
             list.innerHTML = '';
 
+            // Handle Subheader Dropdowns
+            if (inputId === 'linkSubheaderSelect' || inputId === 'editLinkSubheaderSelect') {
+                let columnName = '';
+                if (inputId === 'linkSubheaderSelect') {
+                    const colInput = document.getElementById('linkColumnSelect');
+                    if (colInput) columnName = colInput.value.trim();
+                } else if (currentEditLink) {
+                    const cat = currentEditLink.closest('.category');
+                    if (cat) columnName = cat.getAttribute('data-category');
+                }
+
+                const subheaders = getAvailableSubheaders(columnName);
+
+                // Option: No Subheader (Directly under Header)
+                const noneItem = document.createElement('div');
+                noneItem.className = 'dropdown-item';
+                noneItem.style.fontStyle = 'italic';
+                noneItem.style.color = '#94a3b8';
+                noneItem.textContent = '-- None (Directly under Header) --';
+                noneItem.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    input.value = '';
+                    list.classList.remove('show');
+                });
+                list.appendChild(noneItem);
+
+                const filtered = subheaders.filter(sub => sub.toUpperCase().includes(filter) || filter === '');
+
+                filtered.forEach(sub => {
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    if (input.value.trim().toUpperCase() === sub.toUpperCase()) {
+                        item.classList.add('selected');
+                    }
+                    item.textContent = sub;
+
+                    item.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        input.value = sub;
+                        list.classList.remove('show');
+                    });
+
+                    list.appendChild(item);
+                });
+
+                if (filtered.length === 0 && subheaders.length === 0) {
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    item.textContent = columnName ? 'No subheaders yet (type to create new)' : 'Select a column first';
+                    item.style.color = '#94a3b8';
+                    item.style.cursor = 'default';
+                    list.appendChild(item);
+                }
+                return;
+            }
+
+            // Otherwise: Column Dropdown
+            const columns = getAvailableColumns();
             const filteredColumns = columns.filter(col => 
                 col.toUpperCase().includes(filter) || filter === ''
             );
@@ -2654,10 +2872,14 @@
                 }
                 item.textContent = col;
 
-                item.addEventListener('click', () => {
+                item.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
                     input.value = col;
                     list.classList.remove('show');
-                    input.blur();
+                    if (inputId === 'linkColumnSelect') {
+                        const subInput = document.getElementById('linkSubheaderSelect');
+                        if (subInput) subInput.value = '';
+                    }
                 });
 
                 list.appendChild(item);
@@ -2677,10 +2899,22 @@
                 if (!document.getElementById('linkColumnSelect').value) {
                     document.getElementById('linkColumnSelect').value = '';
                 }
-                setTimeout(() => setupDropdown('linkColumnSelect', 'linkColumnList'), 50);
+                if (!document.getElementById('linkSubheaderSelect').value) {
+                    document.getElementById('linkSubheaderSelect').value = '';
+                }
+                setTimeout(() => {
+                    setupDropdown('linkColumnSelect', 'linkColumnList');
+                    setupDropdown('linkSubheaderSelect', 'linkSubheaderList');
+                }, 50);
+            } else if (modalId === 'editLinkModal') {
+                setTimeout(() => {
+                    setupDropdown('editLinkSubheaderSelect', 'editLinkSubheaderList');
+                }, 50);
             } else if (modalId === 'addSubheaderModal') {
                 document.getElementById('subheaderText').value = '';
-                document.getElementById('subheaderColumn').value = '';
+                if (!document.getElementById('subheaderColumn').value) {
+                    document.getElementById('subheaderColumn').value = '';
+                }
                 setTimeout(() => setupDropdown('subheaderColumn', 'subheaderColumnList'), 50);
             }
         }
@@ -2710,6 +2944,7 @@
                 const editBtn = document.createElement('button');
                 editBtn.className = 'edit-btn';
                 editBtn.textContent = '✏️';
+                editBtn.title = 'Edit Link';
                 editBtn.type = 'button';
                 editBtn.onclick = (e) => { 
                     e.stopPropagation(); 
@@ -2721,6 +2956,7 @@
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.textContent = '🗑️';
+                deleteBtn.title = 'Delete Link';
                 deleteBtn.type = 'button';
                 deleteBtn.onclick = (e) => { 
                     e.stopPropagation(); 
@@ -2748,8 +2984,23 @@
                 const controls = document.createElement('div');
                 controls.className = 'subheader-controls';
                 
+                const addBtn = document.createElement('button');
+                addBtn.className = 'sub-add-btn';
+                addBtn.textContent = '➕';
+                addBtn.title = 'Add link under this subheader';
+                addBtn.type = 'button';
+                addBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    const catName = category.getAttribute('data-category');
+                    openAddLinkModal(catName, subClone.textContent.trim()); 
+                };
+                controls.appendChild(addBtn);
+
                 const editBtn = document.createElement('button');
+                editBtn.className = 'sub-edit-btn';
                 editBtn.textContent = '✏️';
+                editBtn.title = 'Edit Subheader';
                 editBtn.type = 'button';
                 editBtn.onclick = (e) => { 
                     e.stopPropagation(); 
@@ -2760,7 +3011,9 @@
 
                 if (sub.dataset.custom === 'true') {
                     const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'sub-delete-btn';
                     deleteBtn.textContent = '🗑️';
+                    deleteBtn.title = 'Delete Subheader';
                     deleteBtn.type = 'button';
                     deleteBtn.onclick = (e) => { 
                         e.stopPropagation(); 
@@ -2781,6 +3034,13 @@
             document.getElementById('editLinkTitle').value = link.textContent;
             document.getElementById('editLinkUrl').value = link.href;
             currentEditLink = link;
+            
+            const item = link.closest('.link-item');
+            const currentSub = getSubheaderForLinkItem(item) || '';
+            const subInput = document.getElementById('editLinkSubheaderSelect');
+            if (subInput) {
+                subInput.value = currentSub;
+            }
             openModal('editLinkModal');
         }
 
@@ -2789,24 +3049,34 @@
 
             const newTitle = document.getElementById('editLinkTitle').value.trim();
             const newUrl = document.getElementById('editLinkUrl').value.trim();
+            const subInput = document.getElementById('editLinkSubheaderSelect');
+            const newSubheader = subInput ? subInput.value.trim() : '';
 
             if (!newTitle || !newUrl) {
-                alert('Please fill all fields');
+                alert('Please fill all required fields (Title, URL)');
                 return;
             }
 
             const link = currentEditLink;
             const oldTitle = link.textContent;
             const originalTitle = link.dataset.originalTitle || oldTitle;
+            const item = link.closest('.link-item');
+            const category = item.closest('.category');
 
             link.textContent = newTitle;
             link.href = newUrl;
             link.dataset.modified = 'true';
             link.dataset.originalTitle = originalTitle;
 
-            const count = link.parentElement && link.parentElement.querySelector('.link-count');
+            const count = item.querySelector('.link-count');
             if (count) count.setAttribute('data-link', newTitle);
             if (oldTitle !== newTitle) remapLinkStats(oldTitle, newTitle);
+
+            // If subheader changed, move item to appropriate section
+            const oldSubheader = getSubheaderForLinkItem(item) || '';
+            if (newSubheader !== oldSubheader && category) {
+                insertLinkIntoList(category, item, newSubheader);
+            }
 
             currentEditLink = null;
             closeModal('editLinkModal');
@@ -2846,18 +3116,44 @@
             openModal('addSubheaderModal');
         }
 
-        function openAddLinkModal(columnName) {
-            document.getElementById('linkColumnSelect').value = columnName;
+        function openAddLinkModal(columnName, subheaderName) {
+            document.getElementById('linkColumnSelect').value = columnName || '';
+            const subInput = document.getElementById('linkSubheaderSelect');
+            if (subInput) {
+                subInput.value = subheaderName || '';
+            }
             openModal('addLinkModal');
+            setTimeout(() => {
+                if (columnName && subheaderName) {
+                    document.getElementById('linkTitle').focus();
+                } else if (columnName) {
+                    document.getElementById('linkTitle').focus();
+                } else {
+                    document.getElementById('linkColumnSelect').focus();
+                }
+            }, 100);
+        }
+
+        function openAddSubheaderModal(columnName) {
+            document.getElementById('subheaderColumn').value = columnName || '';
+            openModal('addSubheaderModal');
+            setTimeout(() => {
+                if (columnName) {
+                    document.getElementById('subheaderText').focus();
+                } else {
+                    document.getElementById('subheaderColumn').focus();
+                }
+            }, 100);
         }
 
         function confirmAddLink() {
             const column = document.getElementById('linkColumnSelect').value.trim();
+            const subheader = document.getElementById('linkSubheaderSelect') ? document.getElementById('linkSubheaderSelect').value.trim() : '';
             const title = document.getElementById('linkTitle').value.trim();
             const url = document.getElementById('linkUrl').value.trim();
 
             if (!column || !title || !url) {
-                alert('Please fill all fields');
+                alert('Please fill all required fields (Column, Title, URL)');
                 return;
             }
 
@@ -2867,12 +3163,66 @@
                 return;
             }
 
-            addCustomLink({ title, url, category: column });
+            addCustomLink({ title, url, category: column, subheader: subheader });
             closeModal('addLinkModal');
             document.getElementById('linkTitle').value = '';
             document.getElementById('linkUrl').value = '';
             document.getElementById('linkColumnSelect').value = '';
+            if (document.getElementById('linkSubheaderSelect')) {
+                document.getElementById('linkSubheaderSelect').value = '';
+            }
             autoSave();
+        }
+
+        // Handle Enter key inside modal inputs to submit cleanly
+        function setupModalEnterKey() {
+            const addLinkInputs = ['linkColumnSelect', 'linkSubheaderSelect', 'linkTitle', 'linkUrl'];
+            addLinkInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); confirmAddLink(); }
+                });
+            });
+
+            const editLinkInputs = ['editLinkTitle', 'editLinkUrl', 'editLinkSubheaderSelect'];
+            editLinkInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); confirmEditLink(); }
+                });
+            });
+
+            const addSubInputs = ['subheaderColumn', 'subheaderText'];
+            addSubInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); confirmAddSubheader(); }
+                });
+            });
+
+            const editSubInputs = ['editSubheaderText'];
+            editSubInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); confirmEditSubheader(); }
+                });
+            });
+
+            const addColInputs = ['columnName', 'columnIcon'];
+            addColInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); confirmAddColumn(); }
+                });
+            });
+
+            const editColInputs = ['editColumnName', 'editColumnIcon'];
+            editColInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); confirmEditColumn(); }
+                });
+            });
         }
 
         // Every edit action writes straight to localStorage, so reloading the tab
